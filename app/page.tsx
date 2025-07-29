@@ -68,21 +68,54 @@ export default function Home() {
 
   const handleDownload = async (videoUrl: string, quality: string) => {
     try {
-      // Create a temporary anchor element to trigger download
-      const link = document.createElement('a');
-      link.href = videoUrl;
-      link.download = `twitter-video-${quality}-${videoData?.tweetId || 'video'}.mp4`;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
+      // Check if we're on mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
-      // Some browsers need the element to be in the DOM
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (isMobile) {
+        // For mobile devices, use a different approach
+        // Create a hidden iframe to trigger download
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = videoUrl;
+        document.body.appendChild(iframe);
+        
+        // Remove iframe after a short delay
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+        
+        // Also try to copy the URL to clipboard for manual download
+        try {
+          await navigator.clipboard.writeText(videoUrl);
+          alert(`Video URL copied to clipboard!\n\nFor mobile devices, you may need to:\n1. Long press the video player above\n2. Select "Save video as..."\n3. Or paste the URL in your browser's address bar`);
+        } catch (clipboardErr) {
+          alert(`For mobile devices, please:\n1. Long press the video player above\n2. Select "Save video as..."\n3. Or manually copy this URL: ${videoUrl}`);
+        }
+      } else {
+        // Desktop approach - create download link
+        const link = document.createElement('a');
+        link.href = videoUrl;
+        link.download = `twitter-video-${quality}-${videoData?.tweetId || 'video'}.mp4`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        // Some browsers need the element to be in the DOM
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (err) {
       console.error('Download error:', err);
-      // Fallback: open in new tab
-      window.open(videoUrl, '_blank', 'noopener,noreferrer');
+      
+      // Fallback: show URL for manual download
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        alert(`Download failed. Please:\n1. Long press the video player above\n2. Select "Save video as..."\n3. Or copy this URL: ${videoUrl}`);
+      } else {
+        // Desktop fallback: open in new tab
+        window.open(videoUrl, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
@@ -170,6 +203,11 @@ export default function Home() {
               <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
             <span>{error}</span>
+            {error.includes('rate limit') && (
+              <div className="rate-limit-hint">
+                💡 <strong>Tip:</strong> Try replacing "x.com" with "fxtwitter.com" in your URL for immediate access without rate limits.
+              </div>
+            )}
           </div>
         )}
 
@@ -269,6 +307,40 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+                
+                {/* Mobile-specific download section */}
+                <div className="mobile-download-section">
+                  <div className="mobile-download-header">
+                    <svg className="mobile-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
+                    </svg>
+                    <span>📱 Mobile Download</span>
+                  </div>
+                  <div className="mobile-download-options">
+                    <button
+                      className="mobile-download-button"
+                      onClick={() => {
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                        if (isMobile && selectedVideo) {
+                          // For mobile, copy the URL and show instructions
+                          copyToClipboard(selectedVideo);
+                          alert('Video URL copied! Paste it in your browser to download.');
+                        }
+                      }}
+                    >
+                      <svg className="mobile-download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      Copy Video URL
+                    </button>
+                    <div className="mobile-download-hint">
+                      Paste the URL in your browser's address bar to download
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Instructions */}
@@ -278,7 +350,12 @@ export default function Home() {
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                <span>If download doesn't start automatically, right-click the video player and select "Save video as..."</span>
+                <div className="instructions-content">
+                  <span className="instructions-text">If download doesn't start automatically, right-click the video player and select "Save video as..."</span>
+                  <div className="mobile-instructions">
+                    <strong>📱 Mobile Users:</strong> Long press the video player above and select "Save video as..." or use the copy URL button below.
+                  </div>
+                </div>
               </div>
             </div>
           </div>

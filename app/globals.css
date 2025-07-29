@@ -202,12 +202,22 @@ body {
   margin-top: 1.5rem;
   font-size: 0.95rem;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.75rem;
 }
 
 .error-icon {
   flex-shrink: 0;
+}
+
+.rate-limit-hint {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #fbbf24;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #92400e;
 }
 
 /* Result Container */
@@ -414,6 +424,75 @@ body {
   color: #000000;
 }
 
+/* Mobile Download Section */
+.mobile-download-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  border-left: 4px solid #000000;
+}
+
+.mobile-download-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.mobile-icon {
+  color: #000000;
+  flex-shrink: 0;
+}
+
+.mobile-download-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mobile-download-button {
+  background: #000000;
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.mobile-download-button:hover {
+  background: #1a1a1a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-download-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.mobile-download-hint {
+  font-size: 0.85rem;
+  color: #666666;
+  text-align: center;
+  line-height: 1.4;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+}
+
 .instructions {
   background: #f0f9ff;
   border: 1px solid #bae6fd;
@@ -423,7 +502,7 @@ body {
   color: #0369a1;
   font-size: 0.9rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   line-height: 1.5;
 }
@@ -431,6 +510,27 @@ body {
 .info-icon {
   color: #0369a1;
   flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.instructions-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.instructions-text {
+  line-height: 1.5;
+}
+
+.mobile-instructions {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #0369a1;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 /* Footer Styles */
