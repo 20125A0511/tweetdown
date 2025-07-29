@@ -1,4 +1,4 @@
-# TweetDown 🐦⬇️
+# TweetDown 
 
 A modern web application to download videos from Twitter/X tweets with multiple quality options.
 
