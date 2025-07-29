@@ -13,7 +13,7 @@ A modern web application to download videos from Twitter/X tweets with multiple 
 
 ## Live Demo 🌐
 
-Visit the live application: [TweetDown](https://tweetdown.vercel.app)
+Visit the live application: [TweetDown](https://tweet-down.vercel.app/)
 
 ## Screenshots 📸
 
