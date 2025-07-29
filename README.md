@@ -15,9 +15,7 @@ A modern web application to download videos from Twitter/X tweets with multiple 
 
 Visit the live application: [TweetDown](https://tweet-down.vercel.app/)
 
-## Screenshots 📸
 
-![TweetDown Interface](https://via.placeholder.com/800x400/1DA1F2/FFFFFF?text=TweetDown+Interface)
 
 ## Tech Stack 🛠️
 
@@ -162,9 +160,7 @@ The app uses these methods when Twitter API credentials are not provided:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License 📄
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Disclaimer ⚖️
 
@@ -189,5 +185,4 @@ If you encounter any issues:
 - The open-source community
 
 ---
-
-Made with ❤️ by [Your Name] 
+Made this because , too many ads on existing video downloaders :)
