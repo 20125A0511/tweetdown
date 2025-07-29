@@ -53,6 +53,8 @@ Visit the live application: [TweetDown](https://tweetdown.vercel.app)
    TWITTER_API_KEY=your_api_key_here
    TWITTER_API_SECRET=your_api_secret_here
    ```
+   
+   **Note**: The app works without these credentials using fallback methods (FxTwitter and syndication APIs). Twitter API credentials provide better quality detection but are optional.
 
 4. **Run the development server**
    ```bash
@@ -127,16 +129,30 @@ The app can be deployed to any Node.js hosting platform:
 
 ## Environment Variables 🔧
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `TWITTER_API_KEY` | Twitter API Key | No (uses fallback methods) |
-| `TWITTER_API_SECRET` | Twitter API Secret | No (uses fallback methods) |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `TWITTER_API_KEY` | Twitter API Key from developer portal | No | Uses fallback methods |
+| `TWITTER_API_SECRET` | Twitter API Secret from developer portal | No | Uses fallback methods |
+
+### Getting Twitter API Credentials
+
+1. **Visit Twitter Developer Portal**: https://developer.twitter.com/en/portal/dashboard
+2. **Create a new app** or use an existing one
+3. **Get your API Key and Secret** from the app settings
+4. **Add them to your environment variables**
+
+### Fallback Methods (No API Keys Required)
+
+The app uses these methods when Twitter API credentials are not provided:
+- **FxTwitter API**: Extracts videos from fxtwitter.com/fixupx.com
+- **Syndication API**: Uses Twitter's public syndication endpoint
+- **Caching**: 60-minute cache to reduce requests
 
 ## Rate Limits ⚠️
 
 - **Twitter API Free Tier**: 300 requests per 15 minutes
 - **Fallback Methods**: FxTwitter API (no limits)
-- **Caching**: 5-minute cache to reduce API calls
+- **Caching**: 60-minute cache to reduce API calls
 
 ## Contributing 🤝
 

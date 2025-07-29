@@ -18,9 +18,9 @@ interface CacheEntry {
   timestamp: number;
 }
 
-// Twitter API credentials
-const TWITTER_API_KEY = 'ygkbCuk6kChsEH2vYbF50gXwl';
-const TWITTER_API_SECRET = 'AVt4qLVxQaZ86i08GWpljXzK2de5ecpiK77eb4GrEFphYwOmIh';
+// Twitter API credentials from environment variables
+const TWITTER_API_KEY = process.env.TWITTER_API_KEY;
+const TWITTER_API_SECRET = process.env.TWITTER_API_SECRET;
 
 // Enhanced cache with longer duration and better persistence
 const cache = new Map<string, CacheEntry>();
@@ -59,6 +59,11 @@ function checkRateLimit(tweetId: string): boolean {
 
 // Get Bearer Token for Twitter API v2
 async function getBearerToken(): Promise<string> {
+  // Check if API keys are available
+  if (!TWITTER_API_KEY || !TWITTER_API_SECRET) {
+    throw new Error('Twitter API credentials not configured');
+  }
+
   // Return cached token if still valid
   if (bearerToken && Date.now() < tokenExpiry) {
     return bearerToken;
@@ -253,96 +258,101 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Method 3: Only use Twitter API if we still have no videos (to minimize rate limit issues)
+    // Method 3: Only use Twitter API if we still have no videos and API keys are available
     if (videoData.length === 0) {
-      // Check our internal rate limits first
-      if (!checkRateLimit(tweetId)) {
-        console.log('Internal rate limit exceeded for tweet:', tweetId);
-        return NextResponse.json({ 
-          error: 'Too many requests. Please try again in a few minutes.',
-          rateLimited: true,
-          retryAfter: Math.ceil(RATE_LIMIT_WINDOW / 60000) // minutes
-        }, { status: 429 });
-      }
-
-      // Try Twitter API v2 with authentication
-      try {
-        console.log('No videos found yet, trying Twitter API v2...');
-        const token = await getBearerToken();
-        
-        // Get tweet details using v2 API
-        const tweetUrl = `https://api.twitter.com/2/tweets/${tweetId}?expansions=attachments.media_keys,author_id&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants,alt_text&tweet.fields=created_at,text,public_metrics`;
-        
-        const tweetResponse = await fetch(tweetUrl, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'User-Agent': 'v2TweetLookupJS',
-          }
-        });
-
-        if (tweetResponse.status === 429) {
-          console.log('Rate limited by Twitter API v2');
-          rateLimited = true;
-          const retryAfter = tweetResponse.headers.get('x-rate-limit-reset');
-          if (retryAfter) {
-            const resetTime = new Date(parseInt(retryAfter) * 1000);
-            console.log('Rate limit resets at:', resetTime);
-          }
-        } else if (tweetResponse.ok) {
-          const tweetData = await tweetResponse.json();
-          console.log('Got tweet data from v2 API');
-
-          // Extract tweet text
-          if (tweetData.data?.text && !tweetText) {
-            tweetText = tweetData.data.text;
-          }
-
-          // Process media
-          if (tweetData.includes?.media) {
-            tweetData.includes.media.forEach((media: any) => {
-              console.log('Processing media:', media.type);
-              
-              if (media.type === 'video' || media.type === 'animated_gif') {
-                // Get preview image
-                if (media.preview_image_url && !previewImage) {
-                  previewImage = media.preview_image_url;
-                }
-
-                // Process video variants
-                if (media.variants) {
-                  console.log(`Found ${media.variants.length} video variants`);
-                  media.variants.forEach((variant: any) => {
-                    if (variant.content_type === 'video/mp4' && variant.url) {
-                      const bitrate = parseInt(variant.bit_rate) || 0;
-                      let quality = 'SD';
-                      
-                      // Determine quality based on bitrate
-                      if (bitrate >= 2176000) quality = '1080p';
-                      else if (bitrate >= 832000) quality = '720p';
-                      else if (bitrate >= 256000) quality = '480p';
-                      else quality = '360p';
-
-                      videoData.push({
-                        url: variant.url,
-                        type: 'video/mp4',
-                        quality: quality,
-                        bitrate: bitrate
-                      });
-                    }
-                  });
-                }
-              }
-            });
-          }
-
-          // Sort by bitrate (highest quality first)
-          videoData.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
-          console.log('Total videos found from Twitter API v2:', videoData.length);
-        } else {
-          console.error('Twitter API v2 failed with status:', tweetResponse.status);
+      // Check if Twitter API credentials are available
+      if (!TWITTER_API_KEY || !TWITTER_API_SECRET) {
+        console.log('Twitter API credentials not configured, skipping authenticated API calls');
+      } else {
+        // Check our internal rate limits first
+        if (!checkRateLimit(tweetId)) {
+          console.log('Internal rate limit exceeded for tweet:', tweetId);
+          return NextResponse.json({ 
+            error: 'Too many requests. Please try again in a few minutes.',
+            rateLimited: true,
+            retryAfter: Math.ceil(RATE_LIMIT_WINDOW / 60000) // minutes
+          }, { status: 429 });
         }
-      } catch (error) {
-        console.error('Twitter API v2 error:', error);
+
+        // Try Twitter API v2 with authentication
+        try {
+          console.log('No videos found yet, trying Twitter API v2...');
+          const token = await getBearerToken();
+          
+          // Get tweet details using v2 API
+          const tweetUrl = `https://api.twitter.com/2/tweets/${tweetId}?expansions=attachments.media_keys,author_id&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,variants,alt_text&tweet.fields=created_at,text,public_metrics`;
+          
+          const tweetResponse = await fetch(tweetUrl, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'User-Agent': 'v2TweetLookupJS',
+            }
+          });
+
+          if (tweetResponse.status === 429) {
+            console.log('Rate limited by Twitter API v2');
+            rateLimited = true;
+            const retryAfter = tweetResponse.headers.get('x-rate-limit-reset');
+            if (retryAfter) {
+              const resetTime = new Date(parseInt(retryAfter) * 1000);
+              console.log('Rate limit resets at:', resetTime);
+            }
+          } else if (tweetResponse.ok) {
+            const tweetData = await tweetResponse.json();
+            console.log('Got tweet data from v2 API');
+
+            // Extract tweet text
+            if (tweetData.data?.text && !tweetText) {
+              tweetText = tweetData.data.text;
+            }
+
+            // Process media
+            if (tweetData.includes?.media) {
+              tweetData.includes.media.forEach((media: any) => {
+                console.log('Processing media:', media.type);
+                
+                if (media.type === 'video' || media.type === 'animated_gif') {
+                  // Get preview image
+                  if (media.preview_image_url && !previewImage) {
+                    previewImage = media.preview_image_url;
+                  }
+
+                  // Process video variants
+                  if (media.variants) {
+                    console.log(`Found ${media.variants.length} video variants`);
+                    media.variants.forEach((variant: any) => {
+                      if (variant.content_type === 'video/mp4' && variant.url) {
+                        const bitrate = parseInt(variant.bit_rate) || 0;
+                        let quality = 'SD';
+                        
+                        // Determine quality based on bitrate
+                        if (bitrate >= 2176000) quality = '1080p';
+                        else if (bitrate >= 832000) quality = '720p';
+                        else if (bitrate >= 256000) quality = '480p';
+                        else quality = '360p';
+
+                        videoData.push({
+                          url: variant.url,
+                          type: 'video/mp4',
+                          quality: quality,
+                          bitrate: bitrate
+                        });
+                      }
+                    });
+                  }
+                }
+              });
+            }
+
+            // Sort by bitrate (highest quality first)
+            videoData.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+            console.log('Total videos found from Twitter API v2:', videoData.length);
+          } else {
+            console.error('Twitter API v2 failed with status:', tweetResponse.status);
+          }
+        } catch (error) {
+          console.error('Twitter API v2 error:', error);
+        }
       }
     }
 
