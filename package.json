@@ -1,0 +1,49 @@
+{
+  "name": "tweetdown",
+  "version": "1.0.0",
+  "description": "A modern web application to download videos from Twitter/X tweets with multiple quality options",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/20125A0511/tweetdown.git"
+  },
+  "keywords": [
+    "twitter",
+    "video-downloader",
+    "nextjs",
+    "react",
+    "typescript",
+    "twitter-api",
+    "video-extraction"
+  ],
+  "author": "TweetDown Team",
+  "license": "MIT",
+  "homepage": "https://github.com/20125A0511/tweetdown#readme",
+  "bugs": {
+    "url": "https://github.com/20125A0511/tweetdown/issues"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "14.0.0",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+} 
